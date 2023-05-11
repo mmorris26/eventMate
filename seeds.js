@@ -5,10 +5,10 @@ const User = require('./models/user')
 
 const db = require('./config/db');
 
-
+const dotenv = require('dotenv');
+dotenv.config()
 // Establish Database Connection
-mongoose.connect(db, { useNewUrlParser: true });
-mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
+
 
 const firstEvent = new Event({
   title: 'Beatles in Concert',
@@ -127,11 +127,7 @@ const twelfthEvent = new Event({
   attendees: [],
 })
 
-const firstUser = new User({
-  username: 'michelabicocchi',
-  password: 'youshouldnotseethis',
-  attending: []
-})
+
 
 const secondUser = new User({
   username: 'pennythelab',
@@ -176,14 +172,14 @@ const fourthComment = {
 }
 
 
-firstComment.author = firstUser.username
+// firstComment.author = firstUser.username
 firstEvent.comments.push(firstComment)
 firstEvent.comments.push(secondComment)
-firstEvent.attendees.push(firstUser)
+// firstEvent.attendees.push(firstUser)
 firstEvent.attendees.push(secondUser)
 firstEvent.organiser = secondUser.username
-firstUser.attending.push(firstEvent)
-firstUser.attending.push(secondEvent)
+// firstUser.attending.push(firstEvent)
+// firstUser.attending.push(secondEvent)
 twelfthEvent.comments.push(thirdComment)
 twelfthEvent.organiser = fifthUser.username
 fifthEvent.comments.push(fourthComment)
@@ -193,11 +189,14 @@ fifthUser.attending.push(fifthEvent)
 
 const seedDatabase = async () => {
   try {
+  await mongoose.connect(db, { useNewUrlParser: true });
+  await mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
     console.log("DB", db)
-  await mongoose.connect(db)
-  console.log("db connected")
+  // await mongoose.connect(db)
+  // console.log("db connected")
   // await mongoose.connection.db.dropDatabase()
-  await firstUser.save()
+  console.log("database dropped")
+  // await firstUser.save()
   await secondUser.save()
   await thirdUser.save()
   await fourthUser.save()
