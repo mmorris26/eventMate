@@ -17,7 +17,7 @@ const jwt = require('jsonwebtoken')
 const strategy = require('./lib/passportStrategy')
 const jwtOptions = require('./lib/passportOptions')
 
-console.log("Hello heroku")
+
 
 const app = express();
 
