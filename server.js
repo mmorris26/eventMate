@@ -24,6 +24,8 @@ const app = express();
 // mongoose.connect(dbConfig);
 // const db = mongoose.connection;
 
+//to run locally swap out mngodb_uri with db
+
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
 
