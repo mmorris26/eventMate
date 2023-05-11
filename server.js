@@ -69,6 +69,6 @@ app.post('/api/login', (req, res) => {
   }
 })
 
-app.listen(8080, () => console.log(`listening on port ${port}`));
+app.listen(port, () => console.log(`listening on port ${port}`));
 
 
