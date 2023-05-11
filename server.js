@@ -24,8 +24,8 @@ const app = express();
 // mongoose.connect(dbConfig);
 // const db = mongoose.connection;
 
-mongoose.connect(db, { useNewUrlParser: true });
-mongoose.connection.once('open', () => console.log('Connected to MongoDB', db));
+mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
+mongoose.connection.once('open', () => console.log('Connected to MongoDB'));
 
 
 
@@ -69,6 +69,6 @@ app.post('/api/login', (req, res) => {
   }
 })
 
-app.listen(port, () => console.log(`listening on port ${port}`));
+app.listen(8080, () => console.log(`listening on port ${port}`));
 
 
