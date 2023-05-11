@@ -110,7 +110,7 @@ export default function EventPage() {
             <input
               name='title'
               onChange={handleInputOnChange}
-              placeholder={singleEvent.title}
+              value={editedEvent.title}
             />
           </div>
           <div className="where-and-when">
@@ -119,7 +119,7 @@ export default function EventPage() {
               <input
                 name='location'
                 onChange={handleInputOnChange}
-                placeholder={singleEvent.location}
+                value={editedEvent.location}
               />
             </div>
             <div className="edit-event-form-input">
@@ -128,7 +128,7 @@ export default function EventPage() {
                 name='date'
                 type="date"
                 onChange={handleInputOnChange}
-                min={new Date().toISOString().split("T")[0]}
+                min={new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
                 placeholder={singleEvent.date ? new Date(singleEvent.date).toLocaleDateString() : ''}
                 value={editedEvent.date}
               />
@@ -139,7 +139,7 @@ export default function EventPage() {
             <textarea
               name='description'
               onChange={handleInputOnChange}
-              placeholder={singleEvent.description}
+              value={editedEvent.description}
             />
           </div>
           <button className="normal-btn" type="submit">Save changes</button>
@@ -162,7 +162,7 @@ export default function EventPage() {
       <hr />
       <div className="comments-container">
         COMMENTS
-        {/* If the showCommentForm is true to Comment form will appear and pass down the id of the event. */}
+        {/* If the there is a valid token in local storage and it has not expired show the create comment form */}
         {tokenExp() && <div className="create-comment-form">
           <CreateCommentForm
             setSingleEvent={setSingleEvent}
