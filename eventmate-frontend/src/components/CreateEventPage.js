@@ -14,7 +14,7 @@ export default function CreateEventPage() {
     title: "",
     description: "",
     location: "",
-    date: new Date().toISOString().split("T")[0],
+    date: new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0],
     comments: [],
     attendees: [],
     organiser: username
@@ -42,16 +42,19 @@ export default function CreateEventPage() {
           <label>Title</label>
           <input
             name='title'
+            value={createdEvent.title}
             onChange={handleTextInput}
             placeholder="Enter your Events Title"
           />
         </div>
 
-        <div id="where-and-when">
+        <div className="where-and-when">
           <div className="create-event-form-input">
             <label>Where</label>
             <input
               name='location'
+              autoComplete="off"
+              value={createdEvent.location}
               onChange={handleTextInput}
               placeholder="Location"
             />
@@ -61,7 +64,7 @@ export default function CreateEventPage() {
             <input
               name='date'
               type="date"
-              min={new Date().toISOString().split("T")[0]}
+              min={new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
               onChange={handleTextInput}
               placeholder="Date"
               value={createdEvent.date}
@@ -70,9 +73,12 @@ export default function CreateEventPage() {
         </div>
         <div className="create-event-form-input">
           <label>Description</label>
-          <textarea name='description' onChange={handleTextInput} placeholder="Description" />
+          <textarea name='description'
+            value={createdEvent.description}
+            onChange={handleTextInput}
+            placeholder="Description" />
         </div>
-        <button onClick={(e) => {
+        <button className="normal-btn" onClick={(e) => {
           e.preventDefault();
           createOneEvent()
 
