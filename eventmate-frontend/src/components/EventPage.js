@@ -172,10 +172,10 @@ export default function EventPage() {
           <div className="attending-area">
             <p>People attending: {singleEvent.attendees.length} </p>
 
-//             {tokenExp() && <button 
-//              className={`normal-btn ${isAttending? 'animate__animated animate__zoomOutRight': ''}`} id="attend-btn" onClick={addUserIdToAttendees}>Attend</button>}
-=======
-            {tokenExp() && singleEvent.attendees.includes(userId) && <button className="danger-btn" onClick={removeUserIdFromAttending}>Unattend</button>}
+             {/* {tokenExp() && <button  */}
+{/* //              className={`normal-btn ${isAttending? 'animate__animated animate__zoomOutRight': ''}`} id="attend-btn" onClick={addUserIdToAttendees}>Attend</button>} */}
+            {tokenExp() && singleEvent.attendees.includes(userId) && 
+            <button className="danger-btn" onClick={removeUserIdFromAttending}>Unattend</button>}
             {tokenExp() && !singleEvent.attendees.includes(userId) && <button className="normal-btn" id="attend-btn" onClick={addUserIdToAttendees}>Attend</button>}
 
           </div>
