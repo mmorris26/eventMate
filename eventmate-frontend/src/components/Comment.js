@@ -29,7 +29,7 @@ export default function Comment({ singleComment, eventId, setSingleEvent }) {
   }
 
   function handleEscForm(e) {
-    if (e.keyCode == 27) {
+    if (e.keyCode === 27) {
       setShowForm(false)
     }
   }
@@ -54,11 +54,13 @@ export default function Comment({ singleComment, eventId, setSingleEvent }) {
             <span className="comment-text"> {singleComment.text}</span>
 
             {/* If the author Id equals the id of the user then update and delete buttons will be visable */}
-            {singleComment.author === `${payload.username}` ?
-              <div>
-                <button onClick={toggleForm}>Edit Comment</button>
-                <button onClick={deleteOneComment}>Delete Comment</button>
-              </div> : null}
+            {tokenExp() && <p id="author"> {singleComment.author === `${payload.username}` ?
+              (singleComment.hideAuthor ?
+                `Anonymous (You)` : `${singleComment.author} (You)`
+              ) : (singleComment.hideAuthor ?
+                `Anonymous` : singleComment.author
+              )
+            } </p>}
           </div>
         }
         {
@@ -67,7 +69,7 @@ export default function Comment({ singleComment, eventId, setSingleEvent }) {
               name="text"
               type="text"
               placeholder={singleComment.text}
-              autoFocus="true"
+              autoFocus={true}
               autoComplete="off"
               required
               value={editedComment.text}
@@ -77,13 +79,11 @@ export default function Comment({ singleComment, eventId, setSingleEvent }) {
             />
           </form>
         }
-        {tokenExp() && <p id="author"> {singleComment.author === `${payload.username}` ?
-          (singleComment.hideAuthor ?
-            `Anonymous (You)` : `${singleComment.author} (you)`
-          ) : (singleComment.hideAuthor ?
-            `Anonymous` : singleComment.author
-          )
-        } </p>}
+        {singleComment.author === `${payload.username}` ?
+          <div className="comment-btns">
+            <button className="normal-btn" onClick={toggleForm}>Edit Comment</button>
+            <button className="danger-btn" onClick={deleteOneComment}>Delete Comment</button>
+          </div> : null}
       </div>
     </div>
   )

@@ -1,7 +1,8 @@
 import { getAllEvents } from "../apis/EventApis"
-import { getOneEvent } from "../apis/EventApis"
 import { useEffect } from "react"
 import SingleEventCard from "./SingleEventCard"
+import { Link } from "react-router-dom"
+import { tokenExp } from "../tokenLogic/tokenLogic"
 
 export default function AllEventsPage(props) {
 
@@ -10,24 +11,31 @@ export default function AllEventsPage(props) {
     getAllEvents()
       .then(events => events.json())
       .then((data => {
-        props.setEveryEvent([...data.events])
+        const now = new Date();
+        const onlyUpcomingEvents = data.events.filter((event) => new Date(event.date) >= now)
+        props.setEveryEvent([...onlyUpcomingEvents])
       }))
       .catch((error) => error.message)
   }, [])
 
   return (
     <div className="homepage-container">
+      {tokenExp() && <Link to='/CreateEventPage' className='nav-link create-btn normal-btn'>Create Event</Link>}
       <div className="homepage-card" >
-        {// Checks to see if there is anything in everyEvent before it maps through it.
+        {
+          // Checks to see if there is anything in everyEvent before it maps through it.
           props.everyEvent.length ?
             props.everyEvent.map((eventInfo, index) => {
               return (
-                // Returns singleEventCard the same number of times as there is items in the array everyEvent and passes down the information for that individual event.
-                <SingleEventCard
-                  index={index}
-                  eventInfo={eventInfo}
-                  key={eventInfo._id}
-                />)
+                <>
+                  {/* Returns singleEventCard the same number of times as there is items in the array everyEvent and passes down the information for that individual event. */}
+                  <SingleEventCard
+                    index={index}
+                    eventInfo={eventInfo}
+                    key={eventInfo._id}
+                  />
+                </>
+              )
             }) : null}
       </div>
     </div>

@@ -5,38 +5,44 @@ import CreateCommentForm from "./CreateCommentForm"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 
+import "animate.css"
+
 
 import { getPayloadFromToken, tokenExp, isOrganiser } from "../tokenLogic/tokenLogic"
 import transformDate from '../transformDate'
-
-
-
 
 export default function EventPage() {
   // State to store the information about the event. Will store an object after the page is loaded
   const [singleEvent, setSingleEvent] = useState({ attendees: [], date: "" })
   const [editedEvent, setEditedEvent] = useState(singleEvent)
 
-  // This state is used as a switch for the create comment form
-  const [showCommentForm, setShowCommentForm] = useState(true)
-
   // This state is used as a switch for the edit event form
   const [showEventForm, setShowEventForm] = useState(false)
 
+  const [isAttending, setIsAttending] = useState(false)
   // Grab the event Id from the url and store it in the variable called id.
   const { id } = useParams()
+
+  // Grabs payload from local storage, then we get the user id from the saved token
+  const payloadFromToken = getPayloadFromToken()
+  const userId = payloadFromToken.userId
 
   // Function that calls the fetch request get one event and then sets it in the singleEvent state
   const getEvent = () => {
     getOneEvent(id)
       .then((event) => event.json())
-      .then((data => setSingleEvent(data.event)))
+      .then((data => {
+        setSingleEvent(data.event)
+        setIsAttending(data.event.attendees.includes(getPayloadFromToken().userId))
+      }))
+      
       .catch((error) => console.log(error.message))
   }
 
   // On page load the function that grabs the event information is called and fed the id of the event.
   useEffect(() => { getEvent(id) }, [])
 
+  // Ensures editedEvents is the same as single events. This is to make sure when someone is added to attending edited events also gets the update.
   useEffect(() => {
     setEditedEvent({
       ...singleEvent,
@@ -62,79 +68,130 @@ export default function EventPage() {
       .catch((error) => console.log(error.message))
   }
 
+  // Function to add a user's id to the event attendees array. 
   function addUserIdToAttendees() {
-    const payloadFromToken = getPayloadFromToken()
-    const userId = payloadFromToken.userId
     if (singleEvent.attendees.includes(userId)) {
       return
+      // Current attendees are spread into an array with the userid added in
+      // which is then stored in a variable called attendees.
     } else {
       const attendees = [...singleEvent.attendees, userId]
+      // singleEvent state is spread into an object and the attendees key is updated with the new attendees array.
       const eventData = { ...singleEvent, attendees: attendees }
+      setIsAttending(true)
+      // We update the backend with the new event data.
       updateOneEvent(eventData._id, eventData)
     }
   }
 
+  // Function to handle the changes in the input fields its dynamic so can be used on multiple fields as long as the input box's name matches the key name in edited event
   function handleInputOnChange(e) {
     setEditedEvent({ ...editedEvent, [e.target.name]: e.target.value })
   }
 
+  // Toggle to show the create event form flips the eventForm from false to true and vice versa.
   function toggleForm() {
     setShowEventForm(!showEventForm)
   }
 
+  // Function for unattend button. 
+  // The attendees array is filtered by selecting all ids different from logged in user id
+  // A new event is created with the info of the current event, plus the new attendees array
+  // Then the backend gets updated
+  function removeUserIdFromAttending() {
+    const newAttendees = singleEvent.attendees.filter((id) => id !== userId)
+    const newEvent = { ...singleEvent, attendees: newAttendees }
+    updateOneEvent(newEvent._id, newEvent)
+  }
+
   return (
     <div className="event-page">
-      {!showEventForm && <div className="event-content">
-        {/* Checks to see if the fetch request is complete before showing the event information */}
-        <p className="title">{singleEvent.title}</p>
-        <p>Description: {singleEvent.description}</p>
-        <p>Location: {singleEvent.location}</p>
-        <p>Date: {transformDate(singleEvent.date)}</p>
-        <p>Organiser: {singleEvent.organiser}</p>
-        <p>People attending: {singleEvent.attendees.length} </p>
-        {/* {tokenExp() && <button onClick={() => setShowCommentForm(!showCommentForm)}>Comment</button>} */}
-        {tokenExp() && <button onClick={addUserIdToAttendees}>Attend</button>}
-        {tokenExp() && isOrganiser(singleEvent.organiser) && <button onClick={toggleForm}>Edit Event</button>}
-        {tokenExp() && isOrganiser(singleEvent.organiser) && <button onClick={deleteOneEvent}>Delete Event</button>}
-        <hr />
-      </div>}
-      {showEventForm && <form className="edit-event-form" onSubmit={() => updateOneEvent(id, editedEvent)}>
-
-        <input
-          name='title'
-          onChange={handleInputOnChange}
-          placeholder={singleEvent.title}
-        />
-        <input
-          name='location'
-          onChange={handleInputOnChange}
-          placeholder={singleEvent.location}
-        />
-        <input
-          name='date'
-          type="date"
-          onChange={handleInputOnChange}
-          min={new Date().toISOString().split("T")[0]}
-          placeholder={singleEvent.date ? new Date(singleEvent.date).toLocaleDateString() : ''}
-          value={editedEvent.date}
-        />
-        <textarea
-          name='description'
-          onChange={handleInputOnChange}
-          placeholder={singleEvent.description}
-        />
-        <button type="submit">Save changes</button>
-      </form>}
-
-      <div className="comments-container">
-        COMMENTS
-        {/* If the showCommentForm is true to Comment form will appear and pass down the id of the event. */}
-        {tokenExp() && <div className="create-comment-form">
-          <CreateCommentForm
-            setSingleEvent={setSingleEvent}
-            setShowCommentForm={setShowCommentForm}
-            id={id} />
+      <div className="event-container">
+        {!showEventForm && <div className="event-content">
+          {/* Checks to see if the fetch request is complete before showing the event information */}
+          <p className="title">{singleEvent.title}</p>
+          <p className="organiser">Planner: {singleEvent.organiser}</p>
+          <div className="where">
+            <img src="/media/map-marker-radius.svg" alt="map marker icon" />
+            {singleEvent.location}
+          </div>
+          <div className="when">
+            <img src="/media/calendar-month-outline.svg" alt="calendar icon" />
+            {transformDate(singleEvent.date)}
+          </div>
+          <div className="description">{singleEvent.description}</div>
         </div>}
+        {showEventForm && <form className="edit-event-form" onSubmit={() => updateOneEvent(id, editedEvent)}>
+          <div className="edit-event-form-input">
+            <label>Title</label>
+            <input
+              name='title'
+              onChange={handleInputOnChange}
+              value={editedEvent.title}
+            />
+          </div>
+          <div className="where-and-when">
+            <div className="edit-event-form-input">
+              <label>Where</label>
+              <input
+                name='location'
+                autoComplete="off"
+                onChange={handleInputOnChange}
+                value={editedEvent.location}
+              />
+            </div>
+            <div className="edit-event-form-input">
+              <label>When</label>
+              <input
+                name='date'
+                type="date"
+                onChange={handleInputOnChange}
+                min={new Date(new Date().getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
+                placeholder={singleEvent.date ? new Date(singleEvent.date).toLocaleDateString() : ''}
+                value={editedEvent.date}
+              />
+            </div>
+          </div>
+          <div className="description-submit">
+            <div className="edit-event-form-input">
+              <label>Description</label>
+              <textarea
+                name='description'
+                onChange={handleInputOnChange}
+                value={editedEvent.description}
+              />
+            </div>
+          </div>
+          <button className="normal-btn" type="submit">Save changes</button>
+        </form>}
+        <div className="event-actions-area">
+          <div className="event-btns">
+            {tokenExp() && isOrganiser(singleEvent.organiser) && <button className="normal-btn" onClick={toggleForm}>Edit Event</button>}
+            {tokenExp() && isOrganiser(singleEvent.organiser) && <button className="danger-btn" onClick={deleteOneEvent}>Delete Event</button>}
+          </div>
+          <div className="attending-area">
+            <p>People attending: {singleEvent.attendees.length} </p>
+
+//             {tokenExp() && <button 
+//              className={`normal-btn ${isAttending? 'animate__animated animate__zoomOutRight': ''}`} id="attend-btn" onClick={addUserIdToAttendees}>Attend</button>}
+=======
+            {tokenExp() && singleEvent.attendees.includes(userId) && <button className="danger-btn" onClick={removeUserIdFromAttending}>Unattend</button>}
+            {tokenExp() && !singleEvent.attendees.includes(userId) && <button className="normal-btn" id="attend-btn" onClick={addUserIdToAttendees}>Attend</button>}
+
+          </div>
+        </div>
+      </div>
+      <hr />
+      <div className="comments-container">
+        <h3 className="comments-title">Comments</h3>
+        {/* If the there is a valid token in local storage and it has not expired show the create comment form */}
+        {
+          tokenExp() && <div className="create-comment-form">
+            <CreateCommentForm
+              setSingleEvent={setSingleEvent}
+              id={id} />
+          </div>
+        }
         {/* This will be where the comments will be generated. The whole event information is passed down */}
         <Comments
           comments={singleEvent.comments}
