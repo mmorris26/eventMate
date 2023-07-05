@@ -37,24 +37,8 @@ We created a collaborative Excalidraw document which could be worked on together
 
 https://excalidraw.com/#room=611b02b78e961aedf070,TQcjd_mak94UCROWp1RbpQ
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<img src="../eventMate-wireframe.png"
+    alt="eventMate wireframe">
 
 
 ### ERD
